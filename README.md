@@ -33,7 +33,7 @@ The dashboard consists of three main analytical views:
   - Customer Analytics view
   - Logistics Performance view
 - **SQL Scripts** (Data modeling & preparation queries)
-- **Olist_Marketplace_Analytics.pbix** (Power BI dashboard file)
+- **Olist_data.pbix** (Power BI dashboard file)
 
 ---
 
