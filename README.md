@@ -2,7 +2,7 @@
 
 ## Project overview
 
-Interactive Power BI dashboard analyzing e-commerce sales, customer behavior, and logistics performance using the Olist Marketplace dataset (2016–2018). The analysis relies on SQL for data preparation and querying, combined with Power BI for interactive data visualization and business insights.
+Interactive Power BI dashboard analyzing e-commerce sales, customer behavior, and logistics performance using the Olist Marketplace dataset (2016-2018). The analysis relies on SQL for data preparation and querying, combined with Power BI for interactive data visualization and business insights.
 
 The dashboard consists of three main analytical views:
 - **Executive Summary:** Overall business health, total revenue (16.64M BRL), order volume (99K), AOV (BRL 167.37), revenue distribution by payment method, regional share, and top product categories.
@@ -23,8 +23,6 @@ The dashboard consists of three main analytical views:
 - **SQL** (Data querying, aggregation, and exploratory data analysis)
 - **Power BI** (Data modeling, Star Schema, dynamic reporting)
 - **DAX measures** (Time intelligence, YoY calculations, custom KPIs like Repeat Buyer Rate % and Avg Days vs Estimate)
-- **Power Query transformations** (Data cleaning, reshaping, and data type formatting)
-- **Data visualization & UX design** (Clear KPI layouts, segment breakdowns, trend charts, and conditional formatting)
 
 ---
 
