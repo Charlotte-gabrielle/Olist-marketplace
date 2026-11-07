@@ -236,7 +236,7 @@ SELECT
     ,i.freight_value
     ,ISNULL(i.price + i.freight_value, 0) AS total_item_value
     ,o.customer_id
-    ,o.order_status -- Kolumna ze wszystkimi statusami
+    ,o.order_status
     ,o.order_purchase_timestamp
     ,o.order_approved_at
     ,o.order_delivered_carrier_date
