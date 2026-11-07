@@ -1,0 +1,278 @@
+--- MAIN CATEGORIES
+
+-- Step 1: Create a mapping table to group detailed subcategories into main categories
+IF OBJECT_ID('dim_product_category', 'U') IS NOT NULL
+    DROP TABLE dim_product_category;
+
+CREATE TABLE dim_product_category (
+    product_category_name_english VARCHAR(100) NULL,
+    main_category VARCHAR(100) NOT NULL
+);
+
+-- Step 2: Insert category mapping data
+INSERT INTO dim_product_category (product_category_name_english, main_category) VALUES
+(NULL, 'Unspecified')
+,('health_beauty', 'Health and Beauty')
+,('perfumery', 'Health and Beauty')
+,('baby', 'Health and Beauty')
+,('diapers_and_hygiene', 'Health and Beauty')
+,('watches_gifts', 'Fashion and Accessories')
+,('fashion_bags_accessories', 'Fashion and Accessories')
+,('luggage_accessories', 'Fashion and Accessories')
+,('fashion_shoes', 'Fashion and Accessories')
+,('fashion_male_clothing', 'Fashion and Accessories')
+,('fashion_underwear_beach', 'Fashion and Accessories')
+,('fashio_female_clothing', 'Fashion and Accessories')
+,('fashion_sport', 'Fashion and Accessories')
+,('fashion_childrens_clothes', 'Fashion and Accessories')
+,('bed_bath_table', 'Home')
+,('furniture_decor', 'Home')
+,('housewares', 'Home')
+,('office_furniture', 'Home')
+,('home_appliances_2', 'Home')
+,('home_appliances', 'Home'),
+,('furniture_living_room', 'Home')
+,('home_confort', 'Home')
+,('air_conditioning', 'Home')
+,('small_appliances_home_oven_and_coffee', 'Home')
+,('kitchen_dining_laundry_garden_furniture', 'Home')
+,('furniture_bedroom', 'Home')
+,('furniture_mattress_and_upholstery', 'Home')
+,('la_cuisine', 'Home')
+,('home_comfort_2', 'Home')
+,('sports_leisure', 'Sports, Hobbies and Leisure')
+,('cool_stuff', 'Sports, Hobbies and Leisure')
+,('toys', 'Sports, Hobbies and Leisure')
+,('pet_shop', 'Sports, Hobbies and Leisure')
+,('musical_instruments', 'Sports, Hobbies and Leisure')
+,('art', 'Sports, Hobbies and Leisure')
+,('christmas_supplies', 'Sports, Hobbies and Leisure')
+,('music', 'Sports, Hobbies and Leisure')
+,('dvds_blu_ray', 'Sports, Hobbies and Leisure')
+,('party_supplies', 'Sports, Hobbies and Leisure')
+,('arts_and_craftmanship', 'Sports, Hobbies and Leisure')
+,('flowers', 'Sports, Hobbies and Leisure')
+,('cds_dvds_musicals', 'Sports, Hobbies and Leisure')
+,('computers_accessories', 'Consumer Electronics')
+,('telephony', 'Consumer Electronics')
+,('computers', 'Consumer Electronics')
+,('small_appliances', 'Consumer Electronics')
+,('electronics', 'Consumer Electronics')
+,('consoles_games', 'Consumer Electronics')
+,('fixed_telephony', 'Consumer Electronics')
+,('audio', 'Consumer Electronics')
+,('tablets_printing_image', 'Consumer Electronics')
+,('cine_photo', 'Consumer Electronics')
+,('auto', 'Auto, Garden and Tools')
+,('garden_tools', 'Auto, Garden and Tools')
+,('construction_tools_construction', 'Auto, Garden and Tools')
+,('home_construction', 'Auto, Garden and Tools')
+,('construction_tools_lights', 'Auto, Garden and Tools')
+,('construction_tools_safety', 'Auto, Garden and Tools')
+,('costruction_tools_garden', 'Auto, Garden and Tools')
+,('signaling_and_security', 'Auto, Garden and Tools')
+,('costruction_tools_tools', 'Auto, Garden and Tools')
+,('stationery', 'Books, Office and Business')
+,('agro_industry_and_commerce', 'Books, Office and Business')
+,('books_general_interest', 'Books, Office and Business')
+,('industry_commerce_and_business', 'Books, Office and Business')
+,('market_place', 'Books, Office and Business')
+,('books_technical', 'Books, Office and Business')
+,('books_imported', 'Books, Office and Business')
+,('security_and_services', 'Books, Office and Business')
+,('food', 'Food and Beverage')
+,('drinks', 'Food and Beverage')
+('food_drink', 'Food and Beverage');
+
+-- Step 3: Verify revenues and sales volume grouped by main categories
+SELECT 
+    cat.main_category
+    ,COUNT(DISTINCT oi.order_id) AS total_orders
+    ,COUNT(oi.order_item_id) AS total_items_sold
+    ,ROUND(SUM(oi.price), 2) AS total_revenue
+FROM order_items_dataset oi
+JOIN products_dataset p 
+    ON oi.product_id = p.product_id
+LEFT JOIN product_category_name_translation t 
+    ON p.product_category_name = t.product_category_name
+LEFT JOIN dim_product_category cat 
+    ON (t.product_category_name_english = cat.product_category_name_english)
+    OR (t.product_category_name_english IS NULL AND cat.product_category_name_english IS NULL)
+GROUP BY 
+    cat.main_category
+ORDER BY 
+    total_revenue DESC;
+
+--CITIES
+
+SELECT 
+    customer_city
+    ,customer_state
+    ,COUNT(customer_id) AS customer_count
+FROM customers_dataset
+GROUP BY 
+    customer_city
+    ,customer_state
+ORDER BY 
+    customer_count DESC;
+
+	CREATE TABLE dim_brazil_regions (
+    state_code VARCHAR(2) PRIMARY KEY
+   ,region_name VARCHAR(20)
+);
+
+INSERT INTO dim_brazil_regions (state_code, region_name) VALUES
+('SP', 'Southeast'), ('RJ', 'Southeast'), ('MG', 'Southeast'), ('ES', 'Southeast'),
+('PR', 'South'), ('RS', 'South'), ('SC', 'South'),
+('DF', 'Center-West'), ('GO', 'Center-West'), ('MT', 'Center-West'), ('MS', 'Center-West'),
+('AL', 'Northeast'), ('BA', 'Northeast'), ('CE', 'Northeast'), ('MA', 'Northeast'),
+('PB', 'Northeast'), ('PE', 'Northeast'), ('PI', 'Northeast'), ('RN', 'Northeast'), ('SE', 'Northeast'),
+('AC', 'North'), ('AP', 'North'), ('AM', 'North'), ('PA', 'North'), 
+('RO', 'North'), ('RR', 'North'), ('TO', 'North');
+
+--- PAYMENT
+
+SELECT 
+    payment_type
+    ,COUNT(*) AS total_records
+    ,MIN(payment_value) AS min_value
+FROM dbo.order_payments_dataset
+WHERE payment_value <= 0 
+   OR payment_type = 'not_defined'
+GROUP BY payment_type;
+
+CREATE VIEW dbo.order_payments_clean AS
+SELECT 
+    order_id
+    ,payment_sequential
+    ,payment_type
+    ,payment_installments
+    ,payment_value
+FROM dbo.order_payments_dataset
+WHERE payment_type <> 'not_defined'
+  AND NOT (payment_value = 0 AND payment_type != 'voucher'); 
+GO
+
+---- CUSTOMER SEGMENTATION
+
+-- A. Order Value Percentiles Distribution
+WITH order_values AS (
+    SELECT 
+        o.order_id
+        ,SUM(i.price) AS order_value
+    FROM dbo.orders_dataset o
+    JOIN dbo.order_items_dataset i ON o.order_id = i.order_id
+    WHERE o.order_status = 'delivered'
+    GROUP BY o.order_id
+)
+SELECT DISTINCT
+    COUNT(*) OVER() AS total_orders
+    ,ROUND(AVG(order_value) OVER(), 2) AS avg_order_value
+    ,ROUND(MIN(order_value) OVER(), 2) AS min_order_value
+    ,ROUND(MAX(order_value) OVER(), 2) AS max_order_value
+    ,PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY order_value) OVER() AS p25_order_value
+    ,PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY order_value) OVER() AS p50_median_order_value
+    ,PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY order_value) OVER() AS p75_order_value
+    ,PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY order_value) OVER() AS p90_order_value
+    ,PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY order_value) OVER() AS p95_order_value
+FROM order_values;
+
+
+-- B. Customer Segmentation (Personas) & Category Diversity
+WITH customer_metrics AS (
+    SELECT 
+        c.customer_unique_id
+        ,COUNT(DISTINCT o.order_id) AS total_orders
+        ,SUM(i.price) AS total_spend_delivered
+        ,MAX(p.payment_installments) AS max_installments
+        ,COUNT(DISTINCT pr.product_category_name) AS distinct_categories_bought
+    FROM dbo.customers_dataset c
+    JOIN dbo.orders_dataset o ON c.customer_id = o.customer_id
+    JOIN dbo.order_items_dataset i ON o.order_id = i.order_id
+    LEFT JOIN dbo.products_dataset pr ON i.product_id = pr.product_id
+    LEFT JOIN dbo.order_payments_dataset p ON o.order_id = p.order_id
+    WHERE o.order_status = 'delivered'
+    GROUP BY c.customer_unique_id
+),
+customer_segmented AS (
+    SELECT 
+        customer_unique_id
+        ,total_orders
+        ,total_spend_delivered
+        ,max_installments
+        ,distinct_categories_bought
+        ,CASE 
+            WHEN total_orders >= 2 OR total_spend_delivered >= 500 
+                THEN '1. VIP & Repeat Buyers'
+            WHEN total_spend_delivered >= 150 AND max_installments >= 6 
+                THEN '2. High-Credit Tech & Heavy Goods'
+            WHEN total_spend_delivered >= 86 
+                THEN '3. Mid-Value Everyday Shoppers'
+            ELSE '4. Low-Value Impulse Shoppers'
+        END AS customer_persona
+    FROM customer_metrics
+)
+SELECT 
+    customer_persona
+    ,COUNT(*) AS total_customers
+    ,SUM(CASE WHEN distinct_categories_bought = 1 THEN 1 ELSE 0 END) AS buyers_1_category
+    ,SUM(CASE WHEN distinct_categories_bought >= 2 THEN 1 ELSE 0 END) AS buyers_multi_category
+    ,ROUND(100.0 * SUM(CASE WHEN distinct_categories_bought >= 2 THEN 1 ELSE 0 END) / COUNT(*), 2) AS multi_category_share_pct
+    ,ROUND(AVG(CAST(distinct_categories_bought AS FLOAT)), 2) AS avg_categories_bought
+    ,MAX(distinct_categories_bought) AS max_categories_bought
+FROM customer_segmented
+GROUP BY customer_persona
+ORDER BY customer_persona;
+
+---SALES TABLE
+
+CREATE VIEW dbo.sales_all AS
+SELECT
+    o.order_id
+    ,i.order_item_id
+    ,i.product_id
+    ,i.seller_id
+    ,i.price
+    ,i.freight_value
+    ,ISNULL(i.price + i.freight_value, 0) AS total_item_value
+    ,o.customer_id
+    ,o.order_status -- Kolumna ze wszystkimi statusami
+    ,o.order_purchase_timestamp
+    ,o.order_approved_at
+    ,o.order_delivered_carrier_date
+    ,o.order_delivered_customer_date
+    ,o.order_estimated_delivery_date
+    -- Wartości wyliczane na bieżąco
+    ,DATEDIFF(day, o.order_purchase_timestamp, o.order_delivered_customer_date) AS delivery_days_actual
+    ,DATEDIFF(day, o.order_purchase_timestamp, o.order_estimated_delivery_date) AS delivery_days_estimated
+    ,CASE 
+        WHEN o.order_delivered_customer_date > o.order_estimated_delivery_date THEN 1 
+        ELSE 0 
+     END AS is_delivery_delayed
+    ,ISNULL(pc.main_category, 'Unspecified') AS main_category
+    ,c.customer_city
+    ,c.customer_state
+    ,br.region_name AS customer_region
+    ,s.seller_city
+    ,s.seller_state
+    ,brs.region_name AS seller_region
+    ,r.review_score
+FROM dbo.orders_dataset o
+LEFT JOIN dbo.order_items_dataset i 
+    ON o.order_id = i.order_id
+LEFT JOIN dbo.customers_dataset c 
+    ON o.customer_id = c.customer_id
+LEFT JOIN dbo.products_dataset p 
+    ON i.product_id = p.product_id
+LEFT JOIN dbo.product_category_name_translation pct 
+    ON p.product_category_name = pct.product_category_name
+LEFT JOIN dbo.dim_product_category pc 
+    ON pct.product_category_name_english = pc.product_category_name_english
+LEFT JOIN dbo.sellers_dataset s 
+    ON i.seller_id = s.seller_id
+LEFT JOIN dbo.dim_brazil_regions br 
+    ON c.customer_state = br.state_code
+LEFT JOIN dbo.dim_brazil_regions brs 
+    ON s.seller_state = brs.state_code
+LEFT JOIN dbo.order_reviews_dataset r
+    ON o.order_id = r.order_id;
